@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="fr">
+<!--
+  STUDIO REVENUS YOUTUBE : fichier unique (CSS, HTML, JavaScript)
+  Repères (Ctrl+F) : "CSS", "ACCUEIL", "STUDIO", "ONGLET", "JS"
+
+  Modifications courantes
+  - Valeurs par défaut : attribut value="" des champs (onglets calc et prev)
+  - Couleurs : variables --ac (accent), --bg (fond), --card (cartes)
+  - Lien PayPal : classe "support"
+  - Consignes envoyées à l'IA : "PROMPT"
+  - Modèle IA hors de Claude : constante AI_MODEL
+  - Ajouter un onglet : 1) <button data-tab="nom"> dans le menu,
+    2) <section id="nom"> dans le studio. Le reste est automatique.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio Revenus YouTube</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ===== CSS : couleurs (thème clair par défaut, sombre automatique) ===== */
+:root{--bg:#f6f5f2;--card:#fff;--tx:#1a1a1a;--mut:#6b6b66;--bd:#e3e1db;--ac:#e5322d;--lo:#8a8a85;--mi:#e5322d;--hi:#1f9d6b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1e1e1c;--tx:#f0efea;--mut:#9c9a92;--bd:#33332f}}
+:root[data-theme="dark"]{--bg:#141413;--card:#1e1e1c;--tx:#f0efea;--mut:#9c9a92;--bd:#33332f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+
+/* ===== CSS : mise en page ===== */
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:24px;margin:8px 0 2px;letter-spacing:-.02em}
+h2{font-size:17px;margin:0 0 10px}
+.sub{color:var(--mut);margin:0 0 18px}
+.note{font-size:13px;color:var(--mut)}
+summary{cursor:pointer}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.cv{position:relative;height:300px}
+.tw{overflow-x:auto}
+.gap{margin-top:14px}
+
+/* Menu */
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+nav button{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit}
+nav button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+
+/* Champs et boutons */
+label{display:block;font-size:12px;color:var(--mut);margin-bottom:4px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.pri,.sec{padding:10px 16px;border-radius:8px;cursor:pointer;font:inherit}
+.pri{background:var(--ac);color:#fff;border:0}
+.sec{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.back{background:none;border:0;color:var(--mut);cursor:pointer;font:inherit;padding:0 0 8px}
+
+/* Tableaux */
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--bd);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+
+/* Indicateurs chiffrés */
+.kpi{border:1px solid var(--bd);border-radius:12px;padding:12px;background:var(--card)}
+.kpi b{display:block;font-size:22px;letter-spacing:-.02em}
+.kpi span{font-size:12px;color:var(--mut)}
+.lo b{color:var(--lo)}.mi b{color:var(--mi)}.hi b{color:var(--hi)}
+.up{color:var(--hi)}.dn{color:var(--ac)}
+
+/* Images et résultats IA */
+.pv{display:none;max-width:100%;max-height:150px;border-radius:8px;margin-top:8px;border:1px solid var(--bd)}
+#v_out,#o_out{line-height:1.6}
+#v_out h2,#o_out h2{margin:16px 0 6px;color:var(--ac)}
+#v_out h3,#o_out h3{margin:12px 0 4px;font-size:15px}
+#v_out ul,#o_out ul{margin:6px 0;padding-left:20px}
+
+/* Projection 10 000 vues */
+.big{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.gauge{height:18px;border-radius:99px;background:var(--bd);overflow:hidden;margin:8px 0}
+.gauge i{display:block;height:100%;background:linear-gradient(90deg,#8a8a85,#e5322d,#1f9d6b);transition:width .6s}
+.fac{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:8px 0}
+.fac span{color:var(--mut);font-size:13px;display:block}
+
+/* Accueil */
+#home{max-width:1000px;margin:0 auto;padding:40px 16px 60px}
+.hero{padding:30px 0 10px}
+.hero h1{font-size:clamp(30px,6vw,52px);line-height:1.05;letter-spacing:-.035em;margin:0 0 14px}
+.hero em,#info h1 em{font-style:normal;color:var(--ac)}
+.hero p{font-size:17px;color:var(--mut);max-width:620px;margin:0 0 22px}
+.hero .pri{font-size:16px;padding:13px 24px}
+.feat{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:30px 0}
+.feat .card{margin:0}
+.feat h3{margin:0 0 6px;font-size:16px}
+.feat p{margin:0;color:var(--mut);font-size:14px}
+.steps{counter-reset:s;display:grid;gap:10px;margin:14px 0 28px}
+.steps div{counter-increment:s;display:flex;gap:12px;align-items:flex-start}
+.steps div:before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--ac);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+
+/* Onglet latéral "Nous soutenir" : couleur = background, côté = right, hauteur = top */
+.support{position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:50;background:#1767d8;color:#fff;text-decoration:none;writing-mode:vertical-rl;padding:16px 10px;padding-right:calc(10px + env(safe-area-inset-right,0px));border-radius:12px 0 0 12px;font-weight:600;font-size:14px;letter-spacing:.04em;box-shadow:0 4px 14px rgba(23,103,216,.35);transition:background .2s,padding .2s}
+.support:hover,.support:focus-visible{background:#0f52b0;padding-left:16px}
+@media(max-width:480px){.support{font-size:12px;padding-top:12px;padding-bottom:12px}}
+#n_txt{height:55vh;min-height:260px;overflow-y:scroll;resize:vertical;line-height:1.6;scrollbar-width:auto}
+#n_txt::-webkit-scrollbar{width:12px}
+#n_txt::-webkit-scrollbar-thumb{background:var(--mut);border-radius:8px;border:2px solid var(--bg)}
+#n_txt::-webkit-scrollbar-track{background:var(--bd);border-radius:8px}
+</style>
+</head>
+<body>
+
+<a class="support" href="https://paypal.me/LMaxou1" target="_blank" rel="noopener noreferrer" aria-label="Nous soutenir via PayPal">♥ Nous soutenir</a>
+
+<!-- ===== ACCUEIL : affiché en premier, masqué à l'entrée du studio ===== -->
+<div id="home">
+  <div class="hero">
+    <h1>Comprenez ce que votre chaîne <em>peut vraiment rapporter</em>.</h1>
+    <p>Un studio simple pour estimer vos revenus YouTube, projeter votre croissance, analyser votre mois et tester vos titres et miniatures avant de publier.</p>
+    <p>Une assistance par IA de qualité vous attend</p>
+    <div class="row"><button class="pri" id="enter">En avant la passion</button></div>
+  </div>
+
+  <div class="feat">
+    <div class="card"><h3>Calculateur de revenus</h3><p>Trois scénarios de RPM (bas, moyen, élevé) pour voir une fourchette réaliste de gains par mois et par an.</p></div>
+    <div class="card"><h3>Prévisions</h3><p>Des courbes de vues, d’abonnés et de revenus sur 6 à 36 mois, selon votre rythme de croissance.</p></div>
+    <div class="card"><h3>Analyse du mois</h3><p>Importez vos données YouTube Studio : vues, abonnés, heures, revenus, RPM réel et évolution face au mois précédent.</p></div>
+    <div class="card"><h3>Objectif</h3><p>Un objectif annuel calculé à partir de vos données de l’année passée, détaillé par l’IA, avec un bloc-note sauvegardé sur votre appareil.</p></div>
+    <div class="card"><h3>Coach IA</h3><p>Claude critique votre dernière vidéo, votre photo de profil et votre bannière, et propose des corrections concrètes.</p></div>
+    <div class="card"><h3>Projection de vues</h3><p>Avant de publier, estimez les chances qu’une vidéo dépasse 1 000, 10 000, 100 000 ou 1 000 000 de vues sur une chaîne vierge, d’après son titre et sa miniature.</p></div>
+    <div class="card"><h3>fonctionement des revenus</h3><p>Tout les détails sur l'obtention, les calculs et le fonctionnement des revenus YouTube</p></div>
+  </div>
+
+  <h2>Comment ça marche</h2>
+  <div class="steps">
+    <div><span><b>Explorez sans compte.</b> Le calculateur et les prévisions fonctionnent tout de suite avec vos propres chiffres.</span></div>
+    <div><span><b>Importez votre chaîne.</b> Exportez un CSV depuis YouTube Studio pour avoir les meilleurs résultat en temps réel.</span></div>
+    <div><span><b>Améliorez et testez.</b> Lancez les analyses IA sur vos visuels et vos futurs titres, puis comparez les versions.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Bon à savoir</h2>
+    <p class="note">Vos données restent dans votre navigateur. Il n’y a pas de connexion directe à Google : l’import se fait par fichier CSV. Les estimations de revenus et de vues sont des projections, pas des promesses. Les analyses IA utilisent Claude, il demandent votre accord et ne fonctionnent que si la page est ouverte par defaut dans Claude sauf si une clé API anthropic est utilisé.</p>
+  </div>
+
+  <h1>Cette page à été realisé de manière bénévole avec une assistance par Ia</h1>
+  <p>Le partage est autorisé mais des problèmes peuvent survenir avec l'IA si mal utilisé</p>
+</div>
+
+<!-- ===== STUDIO : caché tant que l'utilisateur n'a pas cliqué sur "En avant la passion" ===== -->
+<div class="wrap" id="app" style="display:none">
+  <button class="back" id="back">HELLO</button>
+  <h1>Studio Revenus YouTube</h1>
+  <p class="sub">Estimez vos revenus, projetez votre croissance et analysez votre mois.</p>
+
+  <!-- Clé API personnelle (stockée seulement dans ce navigateur) -->
+  <details class="card">
+    <summary><b>Utiliser l’IA hors de Claude (clé API)</b></summary>
+    <p class="note">Dans Claude, l’IA fonctionne sans réglage. Ailleurs (fichier ouvert sur votre ordinateur), collez votre clé API Anthropic ci-dessous. Elle reste dans ce navigateur et n’est envoyée qu’à api.anthropic.com. Pour rappel une clé API est payante, les clé gratuite trouvé sur internet d'inclu aucunement notre responsabilité.</p>
+    <div class="grid"><div><label>Clé API Anthropic</label><input id="k_in" type="password" placeholder="sk-ant-…" autocomplete="off"></div></div>
+    <div class="row"><button class="pri" id="k_save">Enregistrer la clé</button><button class="sec" id="k_del">Supprimer la clé</button></div>
+    <p class="note" id="k_msg"></p>
+  </details>
+
+  <!-- Menu : data-tab doit être égal à l'id de la <section> -->
+  <nav id="nav">
+    <button data-tab="calc" class="on">Calculateur RPM</button>
+    <button data-tab="prev">Prévisions</button>
+    <button data-tab="chan">Ma chaîne</button>
+    <button data-tab="ana">Analyse du mois</button>
+    <button data-tab="obj">Objectif</button>
+    <button data-tab="video">Dernière vidéo (IA)</button>
+    <button data-tab="proj">Projection de vues (IA)</button>
+    <button data-tab="info">Informations complémentaires</button>
+    <button data-tab="mone">Monetisation youtube</button>
+  </nav>
+
+  <!-- ===== ONGLET calc : calculateur RPM ===== -->
+  <section id="calc" class="on">
+    <div class="card">
+      <h2>Revenus selon le RPM</h2>
+      <div class="grid">
+        <div><label>Vues par mois</label><input id="c_views" type="number" value="100000"></div>
+        <div><label>RPM bas (€)</label><input id="c_lo" type="number" step="0.1" value="0.8"></div>
+        <div><label>RPM moyen (€)</label><input id="c_mi" type="number" step="0.1" value="2.5"></div>
+        <div><label>RPM élevé (€)</label><input id="c_hi" type="number" step="0.1" value="6"></div>
+      </div>
+      <p class="note">Le RPM est le revenu pour 1 000 vues, après la part de YouTube. Il varie selon la niche, le pays du public et la saison.</p>
+    </div>
+    <div class="grid" id="c_kpi"></div>
+    <div class="card gap"><div class="cv"><canvas id="c_chart"></canvas></div></div>
+  </section>
+
+  <!-- ===== ONGLET prev : prévisions ===== -->
+  <section id="prev">
+    <div class="card">
+      <h2>Prévisions de vues et d’abonnés</h2>
+      <div class="grid">
+        <div><label>Vues actuelles / mois</label><input id="p_v" type="number" value="100000"></div>
+        <div><label>Abonnés actuels</label><input id="p_s" type="number" value="5000"></div>
+        <div><label>Croissance vues / mois (%)</label><input id="p_gv" type="number" step="0.5" value="5"></div>
+        <div><label>Croissance abonnés / mois (%)</label><input id="p_gs" type="number" step="0.5" value="3"></div>
+        <div><label>Horizon (mois)</label><select id="p_h"><option>6</option><option selected>12</option><option>24</option><option>36</option></select></div>
+        <div><label>RPM de référence (€)</label><select id="p_r"><option value="lo">Bas</option><option value="mi" selected>Moyen</option><option value="hi">Élevé</option></select></div>
+      </div>
+      <div class="row"><button class="sec" id="p_fromch">Utiliser les données de ma chaîne</button></div>
+    </div>
+    <div class="grid" id="p_kpi"></div>
+    <div class="card gap"><div class="cv"><canvas id="p_chart"></canvas></div></div>
+    <div class="card tw"><table id="p_tab"></table></div>
+  </section>
+
+  <!-- ===== ONGLET chan : import des données ===== -->
+  <section id="chan">
+    <div class="card">
+      <h2>Connecter ma chaîne</h2>
+      <p>La connexion directe à Google (OAuth) est impossible depuis cette page, car elle ne peut contacter aucun serveur externe. La méthode fiable : exportez vos données depuis YouTube Studio puis importez-les ici. Tout reste dans votre navigateur.</p>
+      <ol class="note">
+        <li>YouTube Studio → Analyses → Mode avancé</li>
+        <li>Choisissez la période (ex. 90 derniers jours), vue « Date », métriques : Vues, Abonnés, Durée de visionnage, Revenus estimés</li>
+        <li>Exporter → Fichier CSV, puis chargez-le ci-dessous</li>
+      </ol>
+      <div class="grid">
+        <div><label>Nom de la chaîne</label><input id="ch_name" placeholder="Ma chaîne"></div>
+        <div><label>Abonnés actuels</label><input id="ch_subs" type="number" placeholder="5000"></div>
+        <div><label>Fichier CSV</label><input id="ch_file" type="file" accept=".csv,.txt,.tsv"></div>
+      </div>
+      <label class="gap">… ou collez le contenu CSV</label>
+      <textarea id="ch_txt" rows="4" placeholder="Date;Vues;Abonnés;Durée de visionnage (heures);Revenus estimés (EUR)"></textarea>
+      <div class="row"><button class="pri" id="ch_imp">Importer</button><button class="sec" id="ch_demo">Données de démonstration</button><button class="sec" id="ch_clr">Effacer</button></div>
+      <p class="note" id="ch_msg"></p>
+    </div>
+    <div class="card">
+      <h2>Ajouter un jour manuellement</h2>
+      <div class="grid">
+        <div><label>Date</label><input id="m_d" type="date"></div>
+        <div><label>Vues</label><input id="m_v" type="number"></div>
+        <div><label>Abonnés gagnés</label><input id="m_s" type="number"></div>
+        <div><label>Heures de visionnage</label><input id="m_w" type="number" step="0.1"></div>
+        <div><label>Revenus (€)</label><input id="m_r" type="number" step="0.01"></div>
+      </div>
+      <div class="row"><button class="sec" id="m_add">Ajouter</button></div>
+    </div>
+  </section>
+
+  <!-- ===== ONGLET ana : analyse du mois ===== -->
+  <section id="ana">
+    <div class="card">
+      <h2>Outil analytique mensuel</h2>
+      <div class="grid"><div><label>Mois</label><select id="a_m"></select></div></div>
+      <p class="note" id="a_empty">Importez d’abord des données dans l’onglet « Ma chaîne ».</p>
+    </div>
+    <div id="a_body" style="display:none">
+      <div class="grid" id="a_kpi"></div>
+      <div class="card gap"><div class="cv"><canvas id="a_chart"></canvas></div></div>
+      <div class="card">
+        <h2>Détails</h2>
+        <div id="a_det"></div>
+        <div class="row"><button class="sec" id="a_use">Utiliser ces chiffres pour les prévisions</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ONGLET obj : objectif de l'année + bloc-note ===== -->
+  <section id="obj">
+    <div class="card">
+      <h2>Objectif de l’année</h2>
+      <p class="note">L’objectif de l’année suivante est calculé à partir du total de l’année de référence, réduit de 25 % (1 000 000 de vues l’année 0 donnent 750 000 vues à viser l’année 1). L’IA détaille ensuite le plan pour y arriver.</p>
+      <div class="grid"><div><label>Année de référence</label><select id="o_y"></select></div></div>
+      <p class="note" id="o_empty">Importez d’abord des données dans l’onglet « Ma chaîne ».</p>
+    </div>
+    <div id="o_body" style="display:none">
+      <div class="grid" id="o_kpi"></div>
+      <div class="card gap"><div class="cv"><canvas id="o_chart"></canvas></div></div>
+      <div class="card">
+        <p class="note" id="o_info"></p>
+        <div class="row"><button class="pri" id="o_go">Générer mon objectif avec l’IA</button></div>
+        <p class="note" id="o_msg"></p>
+      </div>
+    </div>
+    <div class="card" id="o_card" style="display:none"><div id="o_out"></div></div>
+    <div class="card">
+      <h2>Bloc-note</h2>
+      <p class="note">Écrivez vos envies, idées et objectifs personnels. Le texte est enregistré automatiquement sur cet appareil (dans ce navigateur) et l’IA le prend en compte pour votre objectif. Pour ne rien perdre, téléchargez aussi une copie de temps en temps.</p>
+      <textarea id="n_txt" rows="10" placeholder="Ex. : atteindre 1 000 abonnés, publier une vidéo par semaine, tester un nouveau format…"></textarea>
+      <div class="row">
+        <button class="pri" id="n_save">Enregistrer</button>
+        <button class="sec" id="n_dl">Télécharger (.txt)</button>
+        <button class="sec" id="n_up">Importer un fichier</button>
+        <button class="sec" id="n_clr">Effacer</button>
+        <input id="n_file" type="file" accept=".txt,text/plain" style="display:none">
+      </div>
+      <p class="note" id="n_msg"></p>
+    </div>
+  </section>
+
+  <!-- ===== ONGLET video : analyse IA de la dernière vidéo ===== -->
+  <section id="video">
+    <div class="card">
+      <h2>Dernière vidéo, photo de profil et bannière</h2>
+      <p class="note">Claude analyse votre dernière vidéo longue (titre, miniature) ainsi que l’image de votre chaîne, puis propose des améliorations concrètes. Une page publiée ne peut pas lire votre chaîne YouTube : renseignez les infos de la vidéo et chargez les images (téléchargées depuis YouTube Studio ou une capture). Les champs sont facultatifs, mais plus vous en donnez, plus l’analyse est précise.</p>
+      <div class="grid">
+        <div><label>Thématique de la chaîne</label><input id="v_niche" placeholder="ex. gaming, cuisine, finance…"></div>
+        <div><label>Titre de la vidéo</label><input id="v_title"></div>
+        <div><label>Durée (minutes)</label><input id="v_dur" type="number"></div>
+        <div><label>Vues</label><input id="v_views" type="number"></div>
+        <div><label>CTR impressions (%)</label><input id="v_ctr" type="number" step="0.1"></div>
+        <div><label>Rétention moyenne (%)</label><input id="v_ret" type="number" step="0.1"></div>
+      </div>
+      <label class="gap">Description (optionnel)</label>
+      <textarea id="v_desc" rows="3"></textarea>
+      <div class="grid gap">
+        <div><label>Miniature (16:9)</label><input id="i_thumb" type="file" accept="image/*"><img id="pv_thumb" class="pv" alt="Miniature"></div>
+        <div><label>Photo de profil</label><input id="i_avatar" type="file" accept="image/*"><img id="pv_avatar" class="pv" alt="Photo de profil"></div>
+        <div><label>Bannière</label><input id="i_banner" type="file" accept="image/*"><img id="pv_banner" class="pv" alt="Bannière"></div>
+      </div>
+      <div class="row"><button class="pri" id="v_go">Lancer l’analyse IA</button><button class="sec" id="v_stop" style="display:none">Arrêter</button></div>
+      <p class="note" id="v_msg"></p>
+    </div>
+    <div class="card" id="v_card" style="display:none"><div id="v_out"></div></div>
+  </section>
+
+  <!-- ===== ONGLET proj : projection de vues ===== -->
+  <section id="proj">
+    <div class="card">
+      <h2>Projection avant publication : chances d’atteindre un objectif de vues</h2>
+      <p class="note">Saisissez le titre et la miniature d’une vidéo pas encore publiée. Claude estime la probabilité qu’elle dépasse l’objectif de vues choisi sur une chaîne vierge (sans abonnés ni historique). C’est une estimation fondée sur le packaging et le sujet, pas une garantie : l’algorithme, la concurrence et la qualité de la vidéo comptent aussi.</p>
+      <div class="grid">
+        <div><label>Objectif de vues</label><select id="j_goal"><option value="1000">1 000 vues</option><option value="10000" selected>10 000 vues</option><option value="100000">100 000 vues</option><option value="1000000">1 000 000 de vues</option></select></div>
+        <div><label>Titre</label><input id="j_title"></div>
+        <div><label>Thématique / niche</label><input id="j_niche" placeholder="ex. fitness, tech, gaming…"></div>
+        <div><label>Langue / pays visé</label><input id="j_lang" placeholder="ex. français, France"></div>
+        <div><label>Durée prévue (min)</label><input id="j_dur" type="number"></div>
+        <div><label>Miniature (16:9)</label><input id="i_pthumb" type="file" accept="image/*"><img id="pv_pthumb" class="pv" alt="Miniature"></div>
+      </div>
+      <label class="gap">Idée / résumé de la vidéo (optionnel)</label>
+      <textarea id="j_desc" rows="2"></textarea>
+      <div class="row"><button class="pri" id="j_go">Estimer mes chances</button></div>
+      <p class="note" id="j_msg"></p>
+    </div>
+    <div class="card" id="j_card" style="display:none">
+      <div class="big" id="j_pct"></div>
+      <div class="note" id="j_rng"></div>
+      <div class="gauge"><i id="j_bar" style="width:0"></i></div>
+      <p id="j_ver"></p>
+      <h2>Facteurs</h2>
+      <div id="j_fac"></div>
+      <h2 class="gap">Pour augmenter vos chances</h2>
+      <ul id="j_imp"></ul>
+      <p class="note" id="j_asm"></p>
+    </div>
+  </section>
+
+  <!-- ===== ONGLET info : informations complémentaires (copiez un bloc .card pour en ajouter) ===== -->
+  <section id="info">
+    <h1>Espace complémentaire pour vous aider à devenir <em>famous</em>.</h1>
+
+    <div class="card">
+      <h2>Utilisations des Clés API anthropic</h2>
+      <p class="note">Une clé API Anthropic permet de connecter les modèles d'intelligence artificielle Claude à un site web ou une application pour y intégrer des fonctionnalités IA. Pour l'obtenir, il suffit de créer un compte sur Anthropic Console, puis de générer une clé API dans les paramètres dédiés. Il faut ensuite intégrer cette clé dans le code de ton site pour communiquer avec Claude, envoyer des requêtes et recevoir des réponses générées par l'IA. Attention : ne partage jamais ta clé API publiquement.</p>
+      <p class="note">Obtenir une clé API en cliquant sur le lien ci-dessous.</p>
+      <a href="https://platform.claude.com/create" target="_blank" rel="noopener noreferrer">API Anthropic Claude</a>
+    </div>
+
+    <div class="card">
+      <h2>L'utilité des autres réseaux sociaux</h2>
+      <p class="note">Les autres réseaux sociaux sont essentiels pour attirer de nouveaux spectateurs sur YouTube et augmenter la visibilité de tes vidéos.</p>
+      <p class="note">- TikTok : publier des extraits courts pour toucher un large public et rediriger les spectateurs vers YouTube.</p>
+      <p class="note">- Instagram : utiliser les Reels et les Stories pour fidéliser une communauté et annoncer les nouvelles vidéos.</p>
+      <p class="note">- X (Twitter) : partager ses vidéos, échanger avec d'autres créateurs et développer sa visibilité.</p>
+      <p class="note">- Discord : créer une communauté fidèle qui peut suivre les sorties et participer à la vie de la chaîne.</p>
+      <p class="note">- Facebook : partager ses vidéos dans des groupes spécialisés pour toucher un public ciblé.</p>
+      <p class="note">L'objectif : transformer les abonnés de ces plateformes en spectateurs YouTube, augmenter les vues, les abonnements et faire connaître sa chaîne auprès d'un public plus large.</p>
+    </div>
+
+    <div class="card">
+      <h2>Forger sa communauté Tips</h2>
+      <p class="note">Pour bâtir une communauté YouTube engagée, mise sur la régularité et l'interaction authentique. Définis une ligne éditoriale claire : cible un public précis avec des contenus cohérents pour attirer des abonnés qui partagent tes centres d'intérêt. Interagis activement : réponds aux commentaires sous tes vidéos et utilise l'onglet « Communauté » ou les stories pour prolonger le dialogue entre deux publications. Implique ton audience : demande leur avis sur tes futurs projets, fais des sondages et intègre leurs retours pour créer un sentiment d'appartenance.</p>
+    </div>
+  </section>
+
+  <!-- ===== ONGLET mone : monétisation YouTube ===== -->
+  <section id="mone">
+    <h1>Tout comprendre à la monétisation YouTube !</h1>
+
+    <div class="card">
+      <h2>Obtenir la monétisation</h2>
+      <p class="note">La monétisation passe par le Programme Partenaire YouTube (YPP). Il existe aujourd’hui deux paliers :</p>
+      <div class="tw"><table>
+        <tr><th>Palier</th><th>Abonnés</th><th>Heures de visionnage (12 mois)</th><th>Ce que ça débloque</th></tr>
+        <tr><td>1 · Accès anticipé</td><td>500</td><td>3 000</td><td>Financement par les fans (abonnements payants, Super Chat), Shopping</td></tr>
+        <tr><td>2 · Monétisation complète</td><td>1 000</td><td>4 000</td><td>Revenus publicitaires, part des revenus YouTube Premium, revenus Shorts</td></tr>
+      </table></div>
+      <p class="note">Alternative pour les Shorts : 1 000 abonnés et 10 millions de vues Shorts valides sur 90 jours. Les heures de visionnage des Shorts ne comptent pas dans les 4 000 heures.</p>
+      <p class="note"><b>Attention, changement à venir :</b> à partir du 1er février 2027, les seuils d’accès aux revenus publicitaires vont environ doubler pour les nouveaux candidats (les chaînes déjà partenaires ne sont pas concernées). Vérifiez les chiffres exacts dans YouTube Studio, onglet « Gains », avant de postuler.</p>
+    </div>
+
+    <div class="card">
+      <h2>Comment postuler</h2>
+      <ol class="note">
+        <li>Ouvrez YouTube Studio → onglet « Gains » et consultez votre barre de progression.</li>
+        <li>Quand vous êtes éligible, cliquez sur « Postuler ».</li>
+        <li>Acceptez les conditions du programme et liez un compte AdSense (c’est lui qui vous paie).</li>
+        <li>Attendez la vérification, environ un mois en général.</li>
+      </ol>
+      <p class="note">Conditions de base : aucun avertissement actif sur la chaîne, respect des règles de monétisation, validation en deux étapes activée.</p>
+    </div>
+
+    <div class="card">
+      <h2>Comment sont calculés les revenus</h2>
+      <p class="note">Le revenu dépend du RPM (revenu pour 1 000 vues, après la part de YouTube, qui garde environ 45 % des revenus publicitaires des vidéos longues). Il varie selon la niche, le pays du public, la saison et la durée de la vidéo. Utilisez l’onglet « Calculateur RPM » pour simuler vos gains.</p>
+    </div>
+
+  <h1>Combien YouTube paie-t-il ?</h1>
+
+  <div class="card">
+    <h2>Le RPM (Revenue Per Mille)</h2>
+    <p class="note">Le RPM correspond à ce que vous gagnez réellement pour 1 000 vues, après la part de YouTube. Il varie selon :</p>
+    <ul class="note">
+      <li>Le pays des spectateurs.</li>
+      <li>Le sujet de vos vidéos.</li>
+      <li>La durée et le format des vidéos.</li>
+      <li>Le nombre de publicités diffusées.</li>
+      <li>La période de l’année et l’intérêt des annonceurs.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>La formule</h2>
+    <p style="font-size:20px;margin:6px 0"><b>Revenus = (Vues ÷ 1 000) × RPM</b></p>
+    <p class="note">Exemple : 100 000 vues avec un RPM de 3 € → 100 000 ÷ 1 000 × 3 = <b>300 €</b>.</p>
+  </div>
+
+  <div class="card">
+    <h2>Simulation avec des RPM hypothétiques</h2>
+    <div class="tw"><table>
+      <tr><th>Vues mensuelles</th><th>RPM de 1 €</th><th>RPM de 3 €</th><th>RPM de 5 €</th></tr>
+      <tr><td>10 000</td><td>10 €</td><td>30 €</td><td>50 €</td></tr>
+      <tr><td>50 000</td><td>50 €</td><td>150 €</td><td>250 €</td></tr>
+      <tr><td>100 000</td><td>100 €</td><td>300 €</td><td>500 €</td></tr>
+      <tr><td>500 000</td><td>500 €</td><td>1 500 €</td><td>2 500 €</td></tr>
+      <tr><td>1 000 000</td><td>1 000 €</td><td>3 000 €</td><td>5 000 €</td></tr>
+    </table></div>
+    <p class="note">Ce sont des exemples de calcul, pas des tarifs garantis par YouTube.</p>
+    <div class="row"><button class="pri" data-go="calc">Tester avec mes chiffres</button></div>
+  </div>
+  </section>
+
+</div>
+
+<script>
+/* ===== JS : outils de base ===== */
+const $ = id => document.getElementById(id);
+const fmt = (n, d = 0) => Number(n || 0).toLocaleString("fr-FR", {maximumFractionDigits: d, minimumFractionDigits: d});
+const eur = n => fmt(n) + " €";
+const two = n => ("0" + n).slice(-2);
+const day = d => d.getFullYear() + "-" + two(d.getMonth() + 1) + "-" + two(d.getDate());
+let DATA = [];
+const charts = {};
+
+function kpi(id, items) {
+  $(id).innerHTML = items.map(k => `<div class="kpi ${k[3] || ""}"><span>${k[0]}</span><b>${k[1]}</b><span>${k[2] || ""}</span></div>`).join("");
+}
+
+function chart(id, cfg) {
+  if (charts[id]) charts[id].destroy();
+  Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue("--mut").trim() || "#888";
+  Chart.defaults.borderColor = "rgba(128,128,128,.2)";
+  charts[id] = new Chart($(id), cfg);
+}
+
+/* ===== JS : stockage local (clés yt_data et yt_meta) ===== */
+function load() {
+  try {
+    const d = localStorage.getItem("yt_data");
+    if (d) DATA = JSON.parse(d);
+    const m = JSON.parse(localStorage.getItem("yt_meta") || "null");
+    if (m) { $("ch_name").value = m.name || ""; $("ch_subs").value = m.subs || ""; }
+  } catch (e) {}
+}
+
+function save() {
+  try {
+    localStorage.setItem("yt_data", JSON.stringify(DATA));
+    localStorage.setItem("yt_meta", JSON.stringify({name: $("ch_name").value, subs: $("ch_subs").value}));
+  } catch (e) {}
+}
+
+/* ===== JS : calculateur (revenu = vues / 1000 x RPM) ===== */
+function calc() {
+  const v = +$("c_views").value || 0;
+  const rpm = {lo: +$("c_lo").value || 0, mi: +$("c_mi").value || 0, hi: +$("c_hi").value || 0};
+  const names = {lo: "Scénario bas", mi: "Scénario moyen", hi: "Scénario élevé"};
+  const keys = ["lo", "mi", "hi"];
+  kpi("c_kpi", keys.map(k => [names[k], eur(v / 1000 * rpm[k]) + " / mois", eur(v / 1000 * rpm[k] * 12) + " / an · RPM " + fmt(rpm[k], 2) + " €", k]));
+  chart("c_chart", {
+    type: "bar",
+    data: {labels: ["Bas", "Moyen", "Élevé"], datasets: [{label: "Revenu mensuel (€)", data: keys.map(k => v / 1000 * rpm[k]), backgroundColor: ["#8a8a85", "#e5322d", "#1f9d6b"], borderRadius: 6}]},
+    options: {responsive: true, maintainAspectRatio: false, plugins: {legend: {display: false}}}
+  });
+}
+
+/* ===== JS : prévisions (valeur du mois i = départ x (1 + croissance)^i) ===== */
+function prev() {
+  const v = +$("p_v").value || 0, s = +$("p_s").value || 0;
+  const gv = (+$("p_gv").value || 0) / 100, gs = (+$("p_gs").value || 0) / 100;
+  const h = +$("p_h").value, rpm = +$("c_" + $("p_r").value).value || 0;
+  const labels = [], V = [], S = [];
+  let cum = 0, rows = "";
+  for (let i = 1; i <= h; i++) {
+    const vi = v * Math.pow(1 + gv, i), si = s * Math.pow(1 + gs, i), ri = vi / 1000 * rpm;
+    cum += ri;
+    labels.push("M+" + i); V.push(Math.round(vi)); S.push(Math.round(si));
+    rows += `<tr><td>M+${i}</td><td>${fmt(vi)}</td><td>${fmt(si)}</td><td>${eur(ri)}</td><td>${eur(cum)}</td></tr>`;
+  }
+  $("p_tab").innerHTML = "<tr><th>Mois</th><th>Vues</th><th>Abonnés</th><th>Revenu</th><th>Cumul</th></tr>" + rows;
+  kpi("p_kpi", [
+    ["Vues dans " + h + " mois", fmt(V[h - 1]), "+" + fmt((V[h - 1] / Math.max(v, 1) - 1) * 100) + " %"],
+    ["Abonnés dans " + h + " mois", fmt(S[h - 1]), "+" + fmt(S[h - 1] - s) + " abonnés"],
+    ["Revenu cumulé", eur(cum), "RPM " + fmt(rpm, 2) + " €", "mi"]
+  ]);
+  chart("p_chart", {
+    type: "line",
+    data: {labels, datasets: [
+      {label: "Vues / mois", data: V, borderColor: "#e5322d", backgroundColor: "rgba(229,50,45,.12)", fill: true, tension: .3, yAxisID: "y"},
+      {label: "Abonnés", data: S, borderColor: "#1f9d6b", tension: .3, yAxisID: "y1"}
+    ]},
+    options: {responsive: true, maintainAspectRatio: false, interaction: {mode: "index", intersect: false}, scales: {y: {position: "left"}, y1: {position: "right", grid: {drawOnChartArea: false}}}}
+  });
+}
+
+/* ===== JS : import CSV (colonnes Date, Vues, Abonnés, Durée, Revenus) ===== */
+function num(x) {
+  if (x == null) return 0;
+  x = String(x).replace(/[\s\u00a0€$%]/g, "");
+  x = x.includes(",") && x.includes(".") ? x.replace(/,/g, "") : x.replace(",", ".");
+  const n = parseFloat(x);
+  return isNaN(n) ? 0 : n;
+}
+
+function pdate(s) {
+  s = String(s).trim().replace(/"/g, "");
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);
+  if (m) return m[3] + "-" + two(m[2]) + "-" + two(m[1]);
+  const d = new Date(s);
+  return isNaN(d) ? null : day(d);
+}
+
+function parse(text) {
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const sep = [";", "\t", ","].sort((a, b) => lines[0].split(b).length - lines[0].split(a).length)[0];
+  const head = lines[0].split(sep).map(x => x.replace(/"/g, "").toLowerCase());
+  const find = re => head.findIndex(x => re.test(x));
+  const iD = find(/date|jour|day/), iV = find(/vues|views/), iS = find(/abonn|subscr/), iW = find(/dur|watch|heure|hour/), iR = find(/revenu|revenue|earn/);
+  if (iD < 0 || iV < 0) return [];
+  const out = [];
+  for (const line of lines.slice(1)) {
+    const c = line.split(sep).map(x => x.replace(/"/g, ""));
+    const d = pdate(c[iD]);
+    if (!d) continue;
+    let w = iW >= 0 ? num(c[iW]) : 0;
+    if (iW >= 0 && !/sec|min/.test(head[iW]) && /milli/.test(head[iW])) w /= 3600000;
+    out.push({d, v: num(c[iV]), s: iS >= 0 ? num(c[iS]) : 0, w, r: iR >= 0 ? num(c[iR]) : 0});
+  }
+  return out;
+}
+
+function merge(rows) {
+  const m = {};
+  DATA.concat(rows).forEach(x => { m[x.d] = x; });
+  DATA = Object.keys(m).sort().map(k => m[k]);
+  save();
+  refresh();
+}
+
+function importText(text) {
+  const a = parse(text);
+  $("ch_msg").textContent = a.length
+    ? a.length + " jours importés." + (a.every(x => !x.r) ? " Aucune colonne de revenus détectée." : "")
+    : "Aucune ligne reconnue : vérifiez que le fichier contient une colonne Date et une colonne Vues.";
+  if (a.length) merge(a);
+}
+
+function demo() {
+  const a = [], start = new Date();
+  start.setDate(start.getDate() - 89);
+  for (let i = 0; i < 90; i++) {
+    const dt = new Date(start);
+    dt.setDate(start.getDate() + i);
+    const v = Math.round(2800 + i * 14 + Math.sin(i / 3) * 350 + Math.random() * 400);
+    a.push({d: day(dt), v, s: Math.round(v * 0.012), w: +(v * 0.045).toFixed(1), r: +(v / 1000 * 2.4).toFixed(2)});
+  }
+  $("ch_subs").value = $("ch_subs").value || 5200;
+  $("ch_name").value = $("ch_name").value || "Chaîne démo";
+  merge(a);
+  $("ch_msg").textContent = "90 jours de données fictives chargés.";
+}
+
+/* ===== JS : analyse du mois ===== */
+const MONTHS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const months = () => [...new Set(DATA.map(x => x.d.slice(0, 7)))].sort();
+const mlabel = m => MONTHS[+m.slice(5) - 1] + " " + m.slice(0, 4);
+
+function agg(m) {
+  const days = DATA.filter(x => x.d.slice(0, 7) === m);
+  const t = {n: days.length, v: 0, s: 0, w: 0, r: 0, best: null, days};
+  days.forEach(x => {
+    t.v += x.v; t.s += x.s; t.w += x.w; t.r += x.r;
+    if (!t.best || x.v > t.best.v) t.best = x;
+  });
+  return t;
+}
+
+function delta(a, b) {
+  if (!b) return "";
+  const p = (a / b - 1) * 100;
+  return `<span class="${p >= 0 ? "up" : "dn"}">${p >= 0 ? "▲ +" : "▼ "}${fmt(p, 1)} %</span> vs mois préc.`;
+}
+
+function ana() {
+  const ms = months();
+  $("a_empty").style.display = ms.length ? "none" : "block";
+  $("a_body").style.display = ms.length ? "block" : "none";
+  const sel = $("a_m"), cur = sel.value;
+  sel.innerHTML = ms.slice().reverse().map(m => `<option value="${m}">${mlabel(m)}</option>`).join("");
+  if (!ms.length) return;
+  sel.value = ms.includes(cur) ? cur : ms[ms.length - 1];
+  const m = sel.value, i = ms.indexOf(m), t = agg(m), p = i > 0 ? agg(ms[i - 1]) : null;
+  const rpm = t.v ? t.r / t.v * 1000 : 0, prpm = p && p.v ? p.r / p.v * 1000 : 0;
+  kpi("a_kpi", [
+    ["Vues", fmt(t.v), delta(t.v, p && p.v)],
+    ["Abonnés gagnés", fmt(t.s), delta(t.s, p && p.s)],
+    ["Heures de visionnage", fmt(t.w), delta(t.w, p && p.w)],
+    ["Revenus estimés", fmt(t.r, 2) + " €", delta(t.r, p && p.r), "mi"],
+    ["RPM réel", fmt(rpm, 2) + " €", p ? delta(rpm, prpm) : ""],
+    ["Vues moyennes / jour", fmt(t.n ? t.v / t.n : 0), t.n + " jours de données"]
+  ]);
+  const subsPer1k = t.v ? t.s / t.v * 1000 : 0, minPerView = t.v ? t.w * 60 / t.v : 0;
+  $("a_det").innerHTML = `<div class="tw"><table>
+    <tr><td>Meilleur jour</td><td>${t.best ? t.best.d + " — " + fmt(t.best.v) + " vues" : "–"}</td></tr>
+    <tr><td>Abonnés pour 1 000 vues</td><td>${fmt(subsPer1k, 2)}</td></tr>
+    <tr><td>Durée moyenne par vue (min)</td><td>${fmt(minPerView, 2)}</td></tr>
+    <tr><td>Revenu moyen / jour</td><td>${fmt(t.n ? t.r / t.n : 0, 2)} €</td></tr>
+    <tr><td>Projection fin de mois (revenus)</td><td>${fmt(t.n ? t.r / t.n * 30 : 0)} €</td></tr></table></div>`;
+  chart("a_chart", {
+    type: "bar",
+    data: {labels: t.days.map(x => x.d.slice(8)), datasets: [
+      {type: "bar", label: "Vues", data: t.days.map(x => x.v), backgroundColor: "rgba(229,50,45,.55)", borderRadius: 3, yAxisID: "y"},
+      {type: "line", label: "Revenus (€)", data: t.days.map(x => x.r), borderColor: "#1f9d6b", tension: .3, pointRadius: 0, yAxisID: "y1"}
+    ]},
+    options: {responsive: true, maintainAspectRatio: false, interaction: {mode: "index", intersect: false}, scales: {y1: {position: "right", grid: {drawOnChartArea: false}}}}
+  });
+  window._cur = {t, p};
+}
+
+function useData() {
+  const c = window._cur;
+  if (!c) return;
+  const {t, p} = c, subs = +$("ch_subs").value || 0;
+  $("p_v").value = Math.round(t.n ? t.v / t.n * 30 : t.v);
+  if (subs) $("p_s").value = subs;
+  if (p && p.v) $("p_gv").value = Math.max(-50, Math.min(50, +((t.v / p.v - 1) * 100).toFixed(1)));
+  if (subs && t.s) $("p_gs").value = +(t.s / subs * 100).toFixed(1);
+  if (t.v && t.r) {
+    const r = t.r / t.v * 1000;
+    $("c_mi").value = +r.toFixed(2);
+    $("c_lo").value = +(r * .5).toFixed(2);
+    $("c_hi").value = +(r * 1.8).toFixed(2);
+  }
+  $("c_views").value = $("p_v").value;
+  calc(); prev(); go("prev");
+}
+
+const refresh = () => { calc(); prev(); ana(); obj(); };
+
+/* ===== JS : accès à l'IA (dans Claude = intégré ; ailleurs = clé API personnelle yt_key) ===== */
+const AI_MODEL = "claude-sonnet-5-5";
+
+function apiKey() {
+  try { return localStorage.getItem("yt_key") || ""; } catch (e) { return ""; }
+}
+
+const blob64 = blob => new Promise(ok => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).split(",")[1]);
+  r.readAsDataURL(blob);
+});
+
+async function aiCall(prompt, o = {}) {
+  const imgs = o.images || [];
+  let sample = null;
+  try { sample = window.claude && await claude.use("sample"); } catch (e) {}
+  if (sample) {
+    const opts = {signal: o.signal, cache: false, onText: o.onText};
+    if (imgs.length) opts.images = imgs;
+    return sample(prompt, opts);
+  }
+  const key = apiKey();
+  if (!key) throw {code: "no_key"};
+  const content = [];
+  for (const img of imgs) content.push({type: "image", source: {type: "base64", media_type: "image/jpeg", data: await blob64(img)}});
+  content.push({type: "text", text: prompt});
+  let r;
+  try {
+    r = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", signal: o.signal,
+      headers: {"content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true"},
+      body: JSON.stringify({model: AI_MODEL, max_tokens: 3000, messages: [{role: "user", content}]})
+    });
+  } catch (e) { throw {code: e && e.name === "AbortError" ? "cancelled" : "network"}; }
+  if (!r.ok) throw {code: r.status === 401 || r.status === 403 ? "bad_key" : r.status === 429 ? "rate_limited" : "api_error"};
+  const j = await r.json();
+  const text = (j.content || []).map(x => x.text || "").join("");
+  if (o.onText) o.onText({text});
+  return {text};
+}
+
+async function aiJson(prompt, o) {
+  const text = (await aiCall(prompt, o)).text || "";
+  const a = text.indexOf("{"), b = text.lastIndexOf("}");
+  if (a < 0 || b < a) throw {code: "bad_json"};
+  try { return JSON.parse(text.slice(a, b + 1)); } catch (e) { throw {code: "bad_json"}; }
+}
+
+const AI_ERRORS = {
+  no_key: "Hors de Claude, ajoutez votre clé API dans le panneau « Utiliser l’IA hors de Claude » en haut de la page.",
+  bad_key: "Clé API refusée : vérifiez-la dans le panneau en haut de la page.",
+  network: "Connexion à l’API impossible. Ouvrez cette page depuis un fichier local ou votre propre hébergement (pas depuis une page qui bloque les requêtes externes), puis vérifiez votre connexion.",
+  not_granted: "Autorisation refusée : l’IA nécessite votre accord pour utiliser Claude.",
+  rate_limited: "Trop de demandes, réessayez dans un moment.",
+  cancelled: "Analyse arrêtée.",
+  bad_json: "Réponse IA illisible. Relancez l’estimation."
+};
+const aiErr = code => AI_ERRORS[code] || "L’analyse a échoué. Réessayez.";
+
+/* ===== JS : images (redimensionnées en JPEG) et affichage Markdown ===== */
+const IMG = {};
+let ctl = null;
+
+function pic(file, max) {
+  return new Promise((ok, ko) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement("canvas");
+        c.width = Math.round(im.width * k);
+        c.height = Math.round(im.height * k);
+        c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+        const url = c.toDataURL("image/jpeg", .85);
+        c.toBlob(blob => ok({url, blob, w: im.width, h: im.height}), "image/jpeg", .85);
+      };
+      im.onerror = ko;
+      im.src = r.result;
+    };
+    r.onerror = ko;
+    r.readAsDataURL(file);
+  });
+}
+
+/* key = thumb, avatar, banner ou pthumb ; msg = élément où afficher une erreur */
+function bindImage(key, msg) {
+  $("i_" + key).onchange = function () {
+    const f = this.files[0];
+    if (!f) return;
+    pic(f, 1280).then(o => {
+      IMG[key] = o;
+      const p = $("pv_" + key);
+      p.src = o.url;
+      p.style.display = "block";
+    }).catch(() => { $(msg).textContent = "Image illisible."; });
+  };
+}
+["thumb", "avatar", "banner"].forEach(k => bindImage(k, "v_msg"));
+bindImage("pthumb", "j_msg");
+
+function md(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+    .replace(/^### (.*)$/gm, "<h3>$1</h3>")
+    .replace(/^## (.*)$/gm, "<h2>$1</h2>")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/^[-*] (.*)$/gm, "<li>$1</li>")
+    .replace(/(<li>.*<\/li>\n?)+/g, m => "<ul>" + m + "</ul>")
+    .replace(/\n{2,}/g, "<br>");
+}
+
+/* ===== JS : IA chaîne (PROMPT : modifiez ici les consignes envoyées à Claude) ===== */
+function buildPrompt(order) {
+  const val = (id, alt) => $(id).value || alt;
+  const names = {thumb: "miniature de la vidéo", avatar: "photo de profil de la chaîne", banner: "bannière de la chaîne"};
+  const L = [
+    "Tu es un expert en croissance YouTube (packaging, CTR, branding). Analyse en français cette chaîne et propose des améliorations concrètes et priorisées.",
+    "Thématique : " + val("v_niche", "non précisée")
+  ];
+  const ms = months();
+  if (ms.length) {
+    const m = ms[ms.length - 1], t = agg(m);
+    L.push(`Stats du dernier mois (${m}) : ${fmt(t.v)} vues, ${fmt(t.s)} abonnés gagnés, ${fmt(t.w)} h de visionnage, RPM réel ${fmt(t.v ? t.r / t.v * 1000 : 0, 2)} €.`);
+  }
+  L.push(`Dernière vidéo longue — titre : ${val("v_title", "non fourni")} ; durée : ${val("v_dur", "?")} min ; vues : ${val("v_views", "?")} ; CTR : ${val("v_ctr", "?")} % ; rétention moyenne : ${val("v_ret", "?")} %.`);
+  if ($("v_desc").value) L.push("Description : " + $("v_desc").value.slice(0, 1500));
+  order.forEach((k, i) => L.push(`Image ${i + 1} = ${names[k]} (originale ${IMG[k].w}×${IMG[k].h} px).`));
+  L.push("Règles : n’invente aucune donnée ; si un élément n’est pas fourni, ne l’analyse pas et dis-le en une ligne ; compare les chiffres fournis aux repères courants (CTR 4–10 %, rétention 40–50 %) en précisant que cela dépend de la niche.");
+  L.push("Format Markdown strict : ## Dernière vidéo (### Titre : note /10, points forts, problèmes, 3 titres alternatifs ; ### Miniature : note /10, lisibilité sur mobile, contraste, texte, visage/émotion, cohérence avec le titre, corrections ; ### Performance : lecture du CTR et de la rétention), ## Photo de profil (note /10, lisibilité en petit, cadrage, contraste, reconnaissance), ## Bannière (note /10, zone de sécurité centrale visible sur mobile et TV, message, cohérence avec la marque), ## Les 3 actions prioritaires. Sois direct, concret, sans remplissage.");
+  return L.join("\n");
+}
+
+$("v_stop").onclick = () => { if (ctl) ctl.abort(); };
+
+$("v_go").onclick = async () => {
+  const order = ["thumb", "avatar", "banner"].filter(k => IMG[k]);
+  if (!order.length && !$("v_title").value) { $("v_msg").textContent = "Ajoutez au moins un titre ou une image."; return; }
+  ctl = new AbortController();
+  const out = $("v_out");
+  $("v_card").style.display = "block";
+  out.textContent = "Analyse en cours…";
+  $("v_msg").textContent = "";
+  $("v_go").disabled = true;
+  $("v_stop").style.display = "inline-block";
+  try {
+    await aiCall(buildPrompt(order), {images: order.map(k => IMG[k].blob), signal: ctl.signal, onText: o => { out.innerHTML = md(o.text); }});
+  } catch (e) {
+    if (e && e.text) out.innerHTML = md(e.text); else out.textContent = "";
+    $("v_msg").textContent = aiErr(e && e.code);
+  } finally {
+    $("v_go").disabled = false;
+    $("v_stop").style.display = "none";
+  }
+};
+
+/* ===== JS : projection de vues =====
+   GOALS : pour chaque objectif, libellé, probabilité de base et plafond (utilisés dans le PROMPT) */
+const GOALS = {
+  1000:    {label: "1 000 vues",        base: "environ 15 à 35 %, car beaucoup de vidéos de chaînes vierges restent sous ce seuil mais une part notable l’atteint", boost: 60, cap: 90},
+  10000:   {label: "10 000 vues",       base: "environ 2 à 5 %, car la grande majorité des vidéos reste sous 1 000 vues", boost: 25, cap: 60},
+  100000:  {label: "100 000 vues",      base: "environ 0,2 à 1 %, car cela demande un succès viral exceptionnel", boost: 8, cap: 25},
+  1000000: {label: "1 000 000 de vues", base: "inférieure à 0,3 %, car cela reste un cas extrêmement rare sur une chaîne vierge", boost: 3, cap: 10}
+};
+function listItem(parent, text) {
+  const li = document.createElement("li");
+  li.textContent = text;
+  parent.appendChild(li);
+}
+
+$("j_go").onclick = async () => {
+  const title = $("j_title").value.trim();
+  if (!title && !IMG.pthumb) { $("j_msg").textContent = "Saisissez un titre et ajoutez une miniature."; return; }
+  const imgs = IMG.pthumb ? [IMG.pthumb.blob] : [];
+  const G = GOALS[$("j_goal").value];
+  const P = "Tu es un analyste YouTube expert en packaging (titre + miniature) et en lancement de chaînes. Estime la probabilité qu’une vidéo pas encore publiée dépasse " + G.label + " sur une chaîne VIERGE (0 abonné, aucun historique, aucune audience).\n"
+    + "Objectif de vues : " + G.label + "\nTitre : " + (title || "non fourni") + "\nNiche : " + ($("j_niche").value || "non précisée") + "\nLangue/pays : " + ($("j_lang").value || "non précisé") + "\nDurée prévue : " + ($("j_dur").value || "?") + " min\nIdée : " + ($("j_desc").value.slice(0, 1200) || "non fournie") + "\n"
+    + (imgs.length ? "L’image jointe est la miniature." : "Aucune miniature fournie : dis que l’estimation est moins fiable et plafonne la probabilité.") + "\n"
+    + "Règles de calibration : l’objectif est " + G.label + ". Sur une chaîne vierge, la probabilité de base est " + G.base + ". Ne dépasse " + G.boost + " % que si le sujet a une forte demande de recherche ou de tendance, un titre très accrocheur ET une miniature excellente ; ne dépasse jamais " + G.cap + " %. Raisonne explicitement par rapport à cet objectif : plus il est élevé, plus le potentiel viral, la taille de l’audience visée et la découverte hors abonnés comptent. Les améliorations proposées doivent aider à atteindre précisément cet objectif. N’invente aucun chiffre externe. Précise tes hypothèses.\n"
+    + "Réponds UNIQUEMENT par un objet JSON, sans texte autour, de la forme : {\"probability\": entier 0-100, \"range\": [min,max] entiers, \"verdict\": phrase courte, \"factors\": [{\"name\": string, \"score\": entier 0-10, \"comment\": string}] (6 facteurs : demande du sujet, concurrence/saturation, force du titre, force de la miniature, cohérence titre-miniature, potentiel de découverte sans audience), \"improvements\": [5 actions concrètes et classées par impact], \"assumptions\": string}. Tout en français.";
+  $("j_go").disabled = true;
+  $("j_msg").textContent = "Analyse en cours…";
+  try {
+    const r = await aiJson(P, {images: imgs});
+    const p = Math.max(0, Math.min(100, Math.round(+r.probability || 0)));
+    const range = r.range || [];
+    $("j_card").style.display = "block";
+    $("j_pct").textContent = p + " %";
+    $("j_bar").style.width = p + "%";
+    $("j_rng").textContent = `Fourchette estimée : ${range[0] || p} % à ${range[1] || p} % de chances de dépasser ${G.label}`;
+    $("j_ver").textContent = r.verdict || "";
+    const fac = $("j_fac");
+    fac.innerHTML = "";
+    (r.factors || []).forEach(f => {
+      const row = document.createElement("div"), left = document.createElement("div");
+      const name = document.createElement("b"), comment = document.createElement("span"), score = document.createElement("b");
+      row.className = "fac";
+      name.textContent = f.name;
+      comment.textContent = f.comment;
+      score.textContent = (+f.score || 0) + "/10";
+      left.append(name, comment);
+      row.append(left, score);
+      fac.appendChild(row);
+    });
+    const ul = $("j_imp");
+    ul.innerHTML = "";
+    (r.improvements || []).forEach(x => listItem(ul, x));
+    $("j_asm").textContent = r.assumptions ? "Hypothèses : " + r.assumptions : "";
+    $("j_msg").textContent = "";
+  } catch (e) {
+    $("j_msg").textContent = aiErr(e && e.code);
+  } finally {
+    $("j_go").disabled = false;
+  }
+};
+
+/* ===== JS : panneau clé API ===== */
+$("k_save").onclick = () => {
+  const v = $("k_in").value.trim();
+  if (!/^sk-ant-/.test(v)) { $("k_msg").textContent = "Clé invalide : elle commence par sk-ant-."; return; }
+  try {
+    localStorage.setItem("yt_key", v);
+    $("k_in").value = "";
+    $("k_msg").textContent = "Clé enregistrée dans ce navigateur.";
+  } catch (e) { $("k_msg").textContent = "Stockage indisponible dans ce navigateur."; }
+};
+$("k_del").onclick = () => {
+  try { localStorage.removeItem("yt_key"); } catch (e) {}
+  $("k_msg").textContent = "Clé supprimée.";
+};
+if (apiKey()) $("k_msg").textContent = "Une clé est déjà enregistrée dans ce navigateur.";
+
+/* ===== JS : objectif (OBJ_FACTOR = part de l'année de référence : 0.75 = baisse de 25 %) ===== */
+const OBJ_FACTOR = 0.75;
+const years = () => [...new Set(DATA.map(x => x.d.slice(0, 4)))].sort();
+
+function yearAgg(y) {
+  const days = DATA.filter(x => x.d.slice(0, 4) === y);
+  const t = {v: 0, s: 0, w: 0, r: 0, months: new Set(days.map(x => x.d.slice(0, 7))).size, mv: Array(12).fill(0)};
+  days.forEach(x => {
+    t.v += x.v; t.s += x.s; t.w += x.w; t.r += x.r;
+    t.mv[+x.d.slice(5, 7) - 1] += x.v;
+  });
+  return t;
+}
+
+function obj() {
+  const ys = years();
+  $("o_empty").style.display = ys.length ? "none" : "block";
+  $("o_body").style.display = ys.length ? "block" : "none";
+  const sel = $("o_y"), cur = sel.value;
+  sel.innerHTML = ys.slice().reverse().map(y => `<option>${y}</option>`).join("");
+  if (!ys.length) return;
+  sel.value = ys.includes(cur) ? cur : ys[ys.length - 1];
+  const y = sel.value, t = yearAgg(y), f = OBJ_FACTOR, cut = Math.round((1 - f) * 100);
+  const sub = n => "Année " + y + " : " + n + " · −" + cut + " %";
+  kpi("o_kpi", [
+    ["Objectif vues " + (+y + 1), fmt(t.v * f), sub(fmt(t.v)), "mi"],
+    ["Objectif abonnés gagnés", fmt(t.s * f), sub(fmt(t.s))],
+    ["Objectif heures de visionnage", fmt(t.w * f), sub(fmt(t.w))],
+    ["Objectif revenus", fmt(t.r * f, 2) + " €", sub(fmt(t.r, 2) + " €")]
+  ]);
+  $("o_info").textContent = t.months < 12
+    ? "Seulement " + t.months + " mois de données pour " + y + " : l’objectif est calculé sur le total disponible, il sera plus bas que sur une année complète."
+    : "Année complète de données : l’objectif est calculé sur les 12 mois.";
+  chart("o_chart", {
+    type: "bar",
+    data: {labels: MONTHS.map(m => m.slice(0, 3)), datasets: [
+      {type: "bar", label: "Vues " + y, data: t.mv, backgroundColor: "rgba(229,50,45,.55)", borderRadius: 3},
+      {type: "line", label: "Objectif " + (+y + 1) + " (−" + cut + " %)", data: t.mv.map(v => Math.round(v * f)), borderColor: "#1f9d6b", tension: .3}
+    ]},
+    options: {responsive: true, maintainAspectRatio: false, interaction: {mode: "index", intersect: false}}
+  });
+}
+
+function showGoal(text) {
+  $("o_card").style.display = "block";
+  $("o_out").innerHTML = md(text);
+}
+
+$("o_y").onchange = obj;
+
+$("o_go").onclick = async () => {
+  const y = $("o_y").value, t = yearAgg(y), f = OBJ_FACTOR, cut = Math.round((1 - f) * 100);
+  const notes = $("n_txt").value.trim().slice(0, 1500);
+  const P = [
+    "Tu es un coach de croissance YouTube. Définis en français l’objectif de l’année " + (+y + 1) + " à partir des données analytiques de l’année " + y + ".",
+    "Thématique : " + ($("v_niche").value || "non précisée"),
+    `Données ${y} (${t.months} mois de données) : ${fmt(t.v)} vues, ${fmt(t.s)} abonnés gagnés, ${fmt(t.w)} h de visionnage, ${fmt(t.r, 2)} € de revenus, RPM réel ${fmt(t.v ? t.r / t.v * 1000 : 0, 2)} €.`,
+    "Vues par mois : " + t.mv.map((v, i) => MONTHS[i] + " " + fmt(v)).join(" ; ") + ".",
+    `Règle de projection : l’objectif de l’année suivante est ${f * 100} % du total de l’année de référence (baisse de ${cut} %). Objectifs imposés : ${fmt(t.v * f)} vues, ${fmt(t.s * f)} abonnés gagnés, ${fmt(t.w * f)} h de visionnage, ${fmt(t.r * f, 2)} € de revenus. Utilise exactement ces chiffres sans les modifier.`,
+    notes ? "Souhaits de l’utilisateur (à prendre en compte dans le plan, sans changer les chiffres imposés) : " + notes : "L’utilisateur n’a pas écrit de souhaits particuliers.",
+    "Règles : n’invente aucune donnée ; si moins de 12 mois sont fournis, dis-le en une ligne ; répartis l’objectif de vues par mois en t’appuyant sur la saisonnalité observée.",
+    "Format Markdown strict : ## Objectif " + (+y + 1) + " (les 4 chiffres imposés, chacun avec son total " + y + " en comparaison), ## Répartition mensuelle (liste « mois : vues à viser »), ## Lecture de l’année " + y + " (points forts et points faibles tirés des données), ## Plan d’action (5 actions concrètes et classées), ## Risques et hypothèses. Sois direct, concret, sans remplissage."
+  ].join("\n");
+  $("o_go").disabled = true;
+  $("o_msg").textContent = "";
+  $("o_card").style.display = "block";
+  $("o_out").textContent = "Analyse en cours…";
+  let last = "";
+  try {
+    await aiCall(P, {onText: o => { last = o.text; $("o_out").innerHTML = md(o.text); }});
+    try { localStorage.setItem("yt_goal", JSON.stringify({y, text: last})); } catch (e) {}
+  } catch (e) {
+    $("o_out").textContent = "";
+    $("o_card").style.display = "none";
+    $("o_msg").textContent = aiErr(e && e.code);
+  } finally {
+    $("o_go").disabled = false;
+  }
+};
+
+/* ===== JS : bloc-note (enregistrement automatique dans le navigateur, clé yt_notes) ===== */
+let noteTimer = null, noteReady = false;
+
+function noteSave() {
+  if (!noteReady) return;
+  try {
+    localStorage.setItem("yt_notes", $("n_txt").value);
+    $("n_msg").textContent = "Enregistré à " + new Date().toLocaleTimeString("fr-FR") + ".";
+  } catch (e) { $("n_msg").textContent = "Stockage indisponible dans ce navigateur : utilisez « Télécharger »."; }
+}
+
+function noteLoad() {
+  try { $("n_txt").value = localStorage.getItem("yt_notes") || ""; } catch (e) {}
+  try {
+    const g = JSON.parse(localStorage.getItem("yt_goal") || "null");
+    if (g && g.text) showGoal(g.text);
+  } catch (e) {}
+  noteReady = true;
+}
+
+$("n_txt").oninput = () => {
+  $("n_msg").textContent = "Enregistrement…";
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(noteSave, 500);
+};
+$("n_save").onclick = noteSave;
+window.addEventListener("pagehide", noteSave);
+
+$("n_dl").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([$("n_txt").value], {type: "text/plain;charset=utf-8"}));
+  a.download = "bloc-note-youtube.txt";
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+$("n_up").onclick = () => $("n_file").click();
+$("n_file").onchange = function () {
+  const f = this.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    const cur = $("n_txt").value;
+    $("n_txt").value = cur ? cur + "\n\n" + r.result : r.result;
+    noteSave();
+    this.value = "";
+  };
+  r.readAsText(f);
+};
+$("n_clr").onclick = () => {
+  if (!confirm("Effacer tout le bloc-note ? Cette action est définitive.")) return;
+  $("n_txt").value = "";
+  noteSave();
+};
+
+/* ===== JS : navigation et événements ===== */
+function go(tab) {
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === tab));
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  if (tab === "ana") ana();
+  if (tab === "obj") obj();
+  window.scrollTo(0, 0);
+}
+
+function showApp(on) {
+  $("home").style.display = on ? "none" : "block";
+  $("app").style.display = on ? "block" : "none";
+  try { history.replaceState(null, "", on ? "#studio" : "#"); } catch (e) {}
+  if (on) refresh();
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll("[data-tab],[data-go]").forEach(b => { b.onclick = () => go(b.dataset.tab || b.dataset.go); });
+["c_views", "c_lo", "c_mi", "c_hi"].forEach(id => { $(id).oninput = () => { calc(); prev(); }; });
+["p_v", "p_s", "p_gv", "p_gs", "p_h", "p_r"].forEach(id => { $(id).oninput = prev; });
+
+$("a_m").onchange = ana;
+$("a_use").onclick = useData;
+$("p_fromch").onclick = () => { if (!DATA.length) { go("chan"); return; } ana(); useData(); };
+
+$("ch_imp").onclick = () => {
+  const f = $("ch_file").files[0];
+  if (f) { const r = new FileReader(); r.onload = () => importText(r.result); r.readAsText(f); }
+  else if ($("ch_txt").value.trim()) importText($("ch_txt").value);
+  else $("ch_msg").textContent = "Choisissez un fichier ou collez du CSV.";
+};
+$("ch_demo").onclick = demo;
+$("ch_clr").onclick = () => { DATA = []; save(); $("ch_msg").textContent = "Données effacées."; refresh(); };
+$("ch_name").onchange = $("ch_subs").onchange = save;
+
+$("m_add").onclick = () => {
+  const d = $("m_d").value;
+  if (!d || !$("m_v").value) return;
+  merge([{d, v: +$("m_v").value, s: +$("m_s").value || 0, w: +$("m_w").value || 0, r: +$("m_r").value || 0}]);
+  $("ch_msg").textContent = "Jour ajouté.";
+};
+
+$("enter").onclick = () => showApp(true);
+$("back").onclick = () => showApp(false);
+
+load();
+noteLoad();
+refresh();
+if (location.hash === "#studio") showApp(true);
+</script>
+</body>
+</html>

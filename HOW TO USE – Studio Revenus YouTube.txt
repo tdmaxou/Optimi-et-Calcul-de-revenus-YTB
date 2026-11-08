@@ -1,0 +1,94 @@
+HOW TO USE – Studio Revenus YouTube
+Voici un guide d'utilisation des 9 parties principales du site, rédigé pour être directement intégré dans ton site internet. Chaque partie explique simplement son utilité et les étapes à suivre pour profiter de ses fonctionnalités.
+
+Avant de lire :
+Vos données sont 100% locales dans votre navigateur.
+L'IA n'est pas interne et le fichier doit être lancer dans Claude pour l'utiliser sauf si un API vous avez mis en place le système.
+Ce fichier est gratuit, et aucun projet de site internet n'est prévu.
+Une update pourrait avoir lieu.
+
+MERCI de votre compréhension.
+
+
+1. Calculateur RPM
+Cet outil permet d'estimer combien votre chaîne YouTube peut rapporter en fonction de son nombre de vues mensuelles.
+- Indiquez votre nombre de vues mensuelles.
+- Renseignez trois valeurs de RPM : bas, moyen et élevé.
+- Consultez automatiquement vos revenus mensuels et annuels estimés.
+- Comparez les trois scénarios grâce au graphique.
+Conseil : utilisez le RPM réel de votre chaîne lorsque vous le connaissez afin d'obtenir une estimation plus pertinente.
+
+2. Prévisions
+Cette partie permet d'anticiper l'évolution de votre chaîne sur une période de 6 à 36 mois.
+- Renseignez vos vues et abonnés actuels.
+- Indiquez votre taux de croissance mensuel estimé en pourcentage.
+- Choisissez une durée de projection et un scénario de RPM.
+- Consultez les graphiques et le tableau pour visualiser votre évolution future.
+Vous pouvez également récupérer automatiquement les données de votre chaîne pour faciliter les calculs.
+
+3. Ma chaîne
+Cet espace permet d'importer et de centraliser les statistiques de votre chaîne YouTube.
+- Ouvrez YouTube Studio, puis Analyses et Mode avancé.
+- Exportez vos statistiques au format CSV.
+- Importez le fichier dans le site ou collez directement son contenu.
+- Renseignez le nom de votre chaîne et votre nombre d'abonnés.
+Vous pouvez également ajouter manuellement les statistiques d'une journée ou utiliser les données de démonstration pour tester l'outil.
+
+4. Analyse du mois
+Cet outil transforme vos statistiques importées en un bilan mensuel détaillé.
+- Importez d'abord vos données dans la partie « Ma chaîne ».
+- Sélectionnez le mois que vous souhaitez analyser.
+- Consultez vos vues, abonnés gagnés, heures de visionnage et revenus.
+- Comparez vos résultats avec ceux du mois précédent.
+- Identifiez vos meilleurs jours et consultez votre RPM réel.
+Vous pouvez ensuite transférer les chiffres obtenus directement dans les prévisions.
+
+5. Objectif
+Cette partie vous aide à définir un objectif annuel réaliste et à construire un plan pour faire progresser votre chaîne.
+- Sélectionnez une année de référence parmi vos données importées.
+- Consultez vos statistiques et votre objectif annuel calculé automatiquement.
+- Cliquez sur « Générer mon objectif avec l'IA » pour obtenir un plan de progression personnalisé.
+- Utilisez le bloc-note pour conserver vos idées, vos projets et vos objectifs.
+Le bloc-note est sauvegardé automatiquement sur votre appareil. Vous pouvez également télécharger ou importer vos notes.
+
+6. Dernière vidéo (IA)
+Cette fonctionnalité utilise l'intelligence artificielle Claude pour analyser votre dernière vidéo longue ainsi que l'identité visuelle de votre chaîne.
+- Renseignez la thématique de votre chaîne et les informations de votre dernière vidéo.
+- Ajoutez votre titre, sa durée, ses vues, son CTR et sa rétention moyenne.
+- Importez votre miniature, votre photo de profil et votre bannière.
+- Cliquez sur « Lancer l'analyse IA » pour recevoir un diagnostic détaillé.
+L'IA attribue des notes, identifie les points faibles et propose des améliorations concrètes pour optimiser vos prochaines publications.
+
+7. Projection de vues (IA)
+Cet outil permet d'évaluer le potentiel d'une future vidéo avant même sa publication.
+- Choisissez votre objectif : 1 000, 10 000, 100 000 ou 1 000 000 de vues.
+- Renseignez le titre et la thématique de votre future vidéo.
+- Indiquez la langue, le pays ciblé et la durée prévue.
+- Importez votre miniature et ajoutez éventuellement un résumé du concept.
+- Cliquez sur « Estimer mes chances ».
+Claude vous fournit une estimation en pourcentage, analyse les facteurs qui influencent votre potentiel et propose des pistes d'amélioration.
+
+Attention : cette estimation est indicative et ne garantit jamais un nombre de vues.
+
+8. Informations complémentaires
+Cet espace regroupe plusieurs ressources et conseils pour accompagner le développement de votre chaîne YouTube.
+
+Vous y trouverez trois grandes catégories :
+- Clés API Anthropic : découvrez leur utilité, comment en obtenir une et comment connecter Claude à votre site.
+- Autres réseaux sociaux : apprenez à utiliser TikTok, Instagram, X, Discord et Facebook pour attirer de nouveaux spectateurs.
+- Construire sa communauté : découvrez des conseils pour fidéliser votre audience, interagir avec vos abonnés et développer une communauté active.
+Prenez le temps de consulter ces ressources pour améliorer votre stratégie de création de contenu.
+9. Monétisation YouTube
+Cette dernière partie rassemble les informations essentielles pour comprendre comment gagner de l'argent grâce à YouTube.
+- Obtenir la monétisation : découvrez les différents seuils d'éligibilité au Programme Partenaire YouTube.
+- Comment postuler : suivez les étapes pour rejoindre le programme et configurer votre compte AdSense.
+- Comprendre le RPM : apprenez comment YouTube calcule vos revenus et quels facteurs influencent votre rémunération.
+- Simulations : consultez différents exemples de revenus selon le nombre de vues et le RPM.
+Vous pouvez également cliquer sur « Tester avec mes chiffres » pour accéder directement au calculateur RPM et réaliser vos propres simulations.
+
+Informations importantes
+- Les données de votre chaîne sont conservées localement dans votre navigateur.
+- L'importation des statistiques se fait par fichier CSV, sans connexion directe à votre compte Google.
+- Les fonctionnalités IA nécessitent Claude ou une clé API Anthropic personnelle. L'utilisation de l'API peut engendrer des frais.
+- Les projections et estimations sont indicatives : elles ne garantissent aucun revenu ni résultat de vues.
+Guide rédigé à partir des fonctionnalités présentes dans le fichier du site. studio-revenus-youtube.html
